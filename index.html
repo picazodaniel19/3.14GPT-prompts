@@ -41,7 +41,8 @@
   .chip:hover{border-color:var(--verde);color:var(--blanco);}
   .chip.active{background:var(--verde);border-color:var(--verde);color:var(--negro);font-weight:600;}
 
-  .admin-btn{font-family:var(--font-body);font-size:13px;font-weight:600;background:var(--carbon);color:var(--gris-claro);border:1px solid var(--grafito);border-radius:999px;padding:8px 16px;cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all .15s ease;}
+  .admin-btn{font-family:var(--font-body);font-size:13px;font-weight:600;background:var(--carbon);color:var(--gris-claro);border:1px solid var(--grafito);border-radius:999px;padding:8px 16px;cursor:pointer;white-space:nowrap;display:none;align-items:center;gap:6px;transition:all .15s ease;}
+  .admin-btn.enabled{display:flex;}
   .admin-btn:hover{border-color:var(--verde);color:var(--blanco);}
   .admin-btn.logged-in{background:var(--verde);color:var(--negro);border-color:var(--verde);}
 
@@ -226,7 +227,18 @@ async function refreshSession(){
   session = data.session;
   updateAdminUI();
 }
+const ADMIN_KEY = 'thekingofprompts';
+
+function isAdminAccessUnlocked(){
+  return window.location.hash.replace('#','') === ADMIN_KEY || !!session;
+}
+
 function updateAdminUI(){
+  if(isAdminAccessUnlocked()){
+    adminBtn.classList.add('enabled');
+  } else {
+    adminBtn.classList.remove('enabled');
+  }
   if(session){
     adminBtn.textContent = 'Cerrar sesión (admin)';
     adminBtn.classList.add('logged-in');
@@ -238,6 +250,8 @@ function updateAdminUI(){
   }
   renderGrid();
 }
+
+window.addEventListener('hashchange', updateAdminUI);
 
 adminBtn.addEventListener('click', async () => {
   if(session){
