@@ -65,6 +65,17 @@
   main{max-width:1200px;margin:0 auto;padding:0 24px 96px;}
   .results-meta{display:flex;justify-content:space-between;align-items:center;color:var(--gris-claro);font-size:13px;font-family:var(--font-mono);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--grafito);}
   .add-btn{background:var(--verde);color:var(--negro);border:none;border-radius:8px;padding:10px 18px;font-family:var(--font-body);font-weight:600;font-size:13px;cursor:pointer;margin-bottom:20px;display:none;align-items:center;gap:8px;}
+
+  .fab{
+    position:fixed;bottom:28px;right:28px;z-index:60;
+    width:56px;height:56px;border-radius:50%;
+    background:var(--verde);color:var(--negro);border:none;
+    display:none;align-items:center;justify-content:center;
+    cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,0.5);
+    transition:transform .15s ease, filter .15s ease;
+  }
+  .fab.visible{display:flex;}
+  .fab:hover{transform:scale(1.08);filter:brightness(1.1);}
   .add-btn.visible{display:inline-flex;}
 
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;}
@@ -288,7 +299,8 @@
     <label>Título</label>
     <input type="text" id="fieldTitle" placeholder="Retrato editorial silueta neón">
     <label>Categoría</label>
-    <input type="text" id="fieldCategory" placeholder="Marca 3.14GPT">
+    <input type="text" id="fieldCategory" placeholder="Marca 3.14GPT" list="categorySuggestions" autocomplete="off">
+    <datalist id="categorySuggestions"></datalist>
     <label>URL de imagen de referencia (opcional)</label>
     <input type="text" id="fieldImage" placeholder="https://i.imgur.com/...">
 
@@ -360,6 +372,10 @@
   </div>
 </div>
 
+<button class="fab" id="fab" title="Agregar prompt">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
 <div class="toast" id="toast">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
   <span id="toastMessage">Guardado</span>
@@ -391,6 +407,7 @@ const emptyState = document.getElementById('emptyState');
 const clearFilter = document.getElementById('clearFilter');
 const adminBtn = document.getElementById('adminBtn');
 const addBtn = document.getElementById('addBtn');
+const fab = document.getElementById('fab');
 const loginModal = document.getElementById('loginModal');
 const promptModal = document.getElementById('promptModal');
 const detailModal = document.getElementById('detailModal');
@@ -454,10 +471,12 @@ function updateAdminUI(){
     adminBtn.textContent = 'Cerrar sesión (admin)';
     adminBtn.classList.add('logged-in');
     addBtn.classList.add('visible');
+    fab.classList.add('visible');
   } else {
     adminBtn.textContent = 'Iniciar sesión';
     adminBtn.classList.remove('logged-in');
     addBtn.classList.remove('visible');
+    fab.classList.remove('visible');
   }
   renderGrid();
 }
@@ -491,7 +510,8 @@ document.getElementById('loginSubmit').addEventListener('click', async () => {
 });
 
 function renderCategories(){
-  const cats = ['Todos', ...new Set(prompts.map(p => p.category))];
+  const uniqueCats = [...new Set(prompts.map(p => p.category))];
+  const cats = ['Todos', ...uniqueCats];
   catFilters.innerHTML = cats.map(c =>
     `<button class="chip${c===activeCategory?' active':''}" data-cat="${c}">${c}</button>`
   ).join('');
@@ -503,6 +523,9 @@ function renderCategories(){
       renderGrid();
     });
   });
+
+  const categorySuggestions = document.getElementById('categorySuggestions');
+  categorySuggestions.innerHTML = uniqueCats.map(c => `<option value="${c}"></option>`).join('');
 }
 
 function formatDate(d){
@@ -711,6 +734,7 @@ detailDeleteBtn.addEventListener('click', async () => {
 });
 
 addBtn.addEventListener('click', () => openPromptModal(null));
+fab.addEventListener('click', () => openPromptModal(null));
 document.getElementById('promptCancel').addEventListener('click', () => promptModal.classList.remove('open'));
 
 const fieldText = document.getElementById('fieldText');
@@ -837,7 +861,11 @@ document.getElementById('promptSubmit').addEventListener('click', async () => {
   showToast(wasEditing ? 'Prompt actualizado ✓' : 'Prompt agregado ✓');
 });
 
-searchInput.addEventListener('input', renderGrid);
+let searchDebounceTimeout;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchDebounceTimeout);
+  searchDebounceTimeout = setTimeout(renderGrid, 250);
+});
 sortSelect.addEventListener('change', () => {
   sortMode = sortSelect.value;
   renderGrid();
