@@ -67,28 +67,36 @@
   .add-btn{background:var(--verde);color:var(--negro);border:none;border-radius:8px;padding:10px 18px;font-family:var(--font-body);font-weight:600;font-size:13px;cursor:pointer;margin-bottom:20px;display:none;align-items:center;gap:8px;}
   .add-btn.visible{display:inline-flex;}
 
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:20px;}
-  .card{background:var(--carbon);border:1px solid var(--grafito);border-radius:8px;overflow:hidden;display:flex;align-items:flex-start;transition:border-color .15s ease, transform .15s ease;position:relative;}
-  .card:hover{transform:translateY(-2px);}
-  .card:hover{border-color:var(--verde);}
-  .card-image{display:none;}
-  .card-body{flex:1;min-width:0;padding:18px 20px;display:flex;flex-direction:column;gap:10px;}
-  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-shrink:0;}
-  .card-title{font-family:var(--font-title);font-weight:700;font-size:18px;letter-spacing:-0.01em;}
-  .card-meta{display:flex;gap:10px;align-items:center;font-family:var(--font-mono);font-size:11px;color:var(--gris-claro);flex-wrap:wrap;flex-shrink:0;}
-  .cat-tag{background:rgba(52,199,89,0.12);color:var(--verde);padding:3px 8px;border-radius:6px;font-weight:500;}
-  .copy-count{
-    display:flex;align-items:center;gap:4px;
-    color:var(--gris-claro);opacity:.7;
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;}
+  .card{
+    background:var(--carbon);border:1px solid var(--grafito);border-radius:8px;
+    padding:16px 18px;cursor:pointer;
+    display:flex;flex-direction:column;gap:10px;
+    transition:border-color .15s ease, transform .15s ease;position:relative;
   }
+  .card:hover{transform:translateY(-2px);border-color:var(--verde);}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .card-title{font-family:var(--font-title);font-weight:700;font-size:16px;letter-spacing:-0.01em;}
+  .card-meta{display:flex;gap:10px;align-items:center;font-family:var(--font-mono);font-size:11px;color:var(--gris-claro);flex-wrap:wrap;}
+  .cat-tag{background:rgba(52,199,89,0.12);color:var(--verde);padding:3px 8px;border-radius:6px;font-weight:500;}
+  .copy-count{display:flex;align-items:center;gap:4px;color:var(--gris-claro);opacity:.7;}
+  .card-admin-actions{display:flex;gap:6px;flex-shrink:0;}
+  .icon-btn{
+    display:flex;align-items:center;justify-content:center;
+    width:30px;height:30px;flex-shrink:0;
+    background:transparent;color:var(--gris-claro);
+    border:1px solid var(--grafito);border-radius:8px;
+    cursor:pointer;transition:all .15s ease;opacity:0.6;
+  }
+  .icon-btn:hover{opacity:1;}
+  .icon-btn.edit-btn:hover{border-color:#58A6FF;color:#58A6FF;}
+  .icon-btn.delete-btn:hover{border-color:#e05656;color:#e05656;}
+
   .terminal-window{
     background:#000000;border:1px solid var(--grafito);border-radius:8px;
-    height:136px;overflow:hidden;position:relative;flex-shrink:0;
+    overflow:hidden;position:relative;
   }
-  .terminal-bar{
-    display:flex;align-items:center;gap:6px;
-    padding:8px 12px;background:var(--grafito);
-  }
+  .terminal-bar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--grafito);}
   .terminal-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
   .terminal-dot.red{background:#FF5F57;}
   .terminal-dot.yellow{background:#FFBD2E;}
@@ -96,24 +104,40 @@
   .card-prompt{
     background:transparent;padding:12px 14px;
     font-family:var(--font-mono);font-size:12.5px;color:var(--gris-claro);
-    height:100px;overflow:hidden;position:relative;line-height:1.6;
+    line-height:1.6;
   }
-  .card-prompt::after{content:'';position:absolute;bottom:0;left:0;right:0;height:28px;background:linear-gradient(transparent, #000000);}
-  .card-actions{display:flex;gap:8px;flex-shrink:0;}
-  .copy-btn{display:flex;align-items:center;gap:7px;background:var(--verde);color:var(--negro);border:none;border-radius:999px;padding:10px 20px;font-family:var(--font-body);font-size:13px;font-weight:700;cursor:pointer;transition:all .15s ease;}
-  .copy-btn:hover{filter:brightness(1.1);transform:translateY(-1px);}
-  .copy-btn.copied{background:var(--blanco);}
-  .edit-btn,.delete-btn{
-    display:flex;align-items:center;gap:6px;
-    background:transparent;color:var(--gris-claro);
-    border:1px solid var(--grafito);border-radius:999px;
-    padding:10px 16px;font-family:var(--font-body);font-size:12.5px;font-weight:600;
+
+  /* ---------- MODAL DE DETALLE ---------- */
+  .detail-modal .modal{max-width:600px;}
+  .detail-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:6px;}
+  .detail-title{font-family:var(--font-title);font-weight:800;font-size:22px;letter-spacing:-0.01em;}
+  .detail-close{
+    background:transparent;border:none;color:var(--gris-claro);
+    cursor:pointer;font-size:20px;line-height:1;padding:4px;flex-shrink:0;
+  }
+  .detail-close:hover{color:var(--blanco);}
+  .detail-meta{display:flex;gap:10px;align-items:center;font-family:var(--font-mono);font-size:12px;color:var(--gris-claro);margin-bottom:18px;}
+  .detail-prompt{
+    max-height:180px;overflow-y:auto;
+    font-family:var(--font-mono);font-size:13px;color:var(--gris-claro);
+    line-height:1.7;padding:14px 16px;
+  }
+  .detail-prompt::-webkit-scrollbar{width:6px;}
+  .detail-prompt::-webkit-scrollbar-thumb{background:var(--grafito);border-radius:6px;}
+  .detail-image{
+    width:100%;max-height:280px;object-fit:cover;
+    border-radius:8px;border:1px solid var(--grafito);
+    margin-top:16px;display:block;
+  }
+  .detail-copy-btn{
+    width:100%;margin-top:20px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    background:var(--verde);color:var(--negro);border:none;border-radius:999px;
+    padding:14px;font-family:var(--font-body);font-size:14px;font-weight:700;
     cursor:pointer;transition:all .15s ease;
-    opacity:0.55;
   }
-  .card:hover .edit-btn,.card:hover .delete-btn{opacity:1;}
-  .edit-btn:hover{border-color:#58A6FF;color:#58A6FF;}
-  .delete-btn:hover{border-color:#e05656;color:#e05656;}
+  .detail-copy-btn:hover{filter:brightness(1.1);}
+  .detail-copy-btn.copied{background:var(--blanco);}
 
   .empty-state{text-align:center;padding:80px 20px;color:var(--gris-claro);}
   .empty-state .big{font-family:var(--font-mono);font-size:40px;color:var(--grafito);margin-bottom:12px;}
@@ -233,24 +257,60 @@
     <input type="text" id="fieldTitle" placeholder="Retrato editorial silueta neón">
     <label>Categoría</label>
     <input type="text" id="fieldCategory" placeholder="Marca 3.14GPT">
+    <label>URL de imagen de referencia (opcional)</label>
+    <input type="text" id="fieldImage" placeholder="https://i.imgur.com/...">
     <label>Texto del prompt</label>
     <textarea id="fieldText" placeholder="Cinematic editorial portrait..."></textarea>
     <label style="display:flex;justify-content:space-between;align-items:center;">
-      <span>Vista previa (como se verá en la tarjeta)</span>
-      <span id="previewOverflowWarning" style="display:none;color:#FFA657;text-transform:none;font-weight:600;">⚠ se recorta</span>
+      <span>Vista previa del prompt</span>
+      <span id="previewOverflowWarning" style="display:none;color:#FFA657;text-transform:none;font-weight:600;">tendrá scroll</span>
     </label>
-    <div class="terminal-window" style="height:auto;">
+    <div class="terminal-window">
       <div class="terminal-bar">
         <span class="terminal-dot red"></span>
         <span class="terminal-dot yellow"></span>
         <span class="terminal-dot green"></span>
       </div>
-      <div class="card-prompt" id="promptPreview" style="height:100px;">Escribe tu prompt para ver la vista previa...</div>
+      <div class="card-prompt" id="promptPreview" style="max-height:100px;overflow-y:auto;">Escribe tu prompt para ver la vista previa...</div>
     </div>
     <div class="modal-error" id="promptError">Completa título, categoría y texto del prompt.</div>
     <div class="modal-actions">
       <button class="btn-secondary" id="promptCancel">Cancelar</button>
       <button class="btn-primary" id="promptSubmit">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay detail-modal" id="detailModal">
+  <div class="modal">
+    <div class="detail-header">
+      <div class="detail-title" id="detailTitle"></div>
+      <button class="detail-close" id="detailClose">✕</button>
+    </div>
+    <div class="detail-meta">
+      <span id="detailDate"></span>
+      <span class="cat-tag" id="detailCategory"></span>
+    </div>
+    <div class="terminal-window">
+      <div class="terminal-bar">
+        <span class="terminal-dot red"></span>
+        <span class="terminal-dot yellow"></span>
+        <span class="terminal-dot green"></span>
+      </div>
+      <div class="detail-prompt" id="detailPrompt"></div>
+    </div>
+    <img class="detail-image" id="detailImage" style="display:none;" alt="Imagen de referencia">
+    <button class="detail-copy-btn" id="detailCopyBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      <span>Copiar prompt</span>
+    </button>
+    <div class="card-admin-actions" id="detailAdminActions" style="display:none;margin-top:14px;justify-content:flex-end;">
+      <button class="icon-btn edit-btn" id="detailEditBtn" title="Editar">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+      </button>
+      <button class="icon-btn delete-btn" id="detailDeleteBtn" title="Borrar">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+      </button>
     </div>
   </div>
 </div>
@@ -288,6 +348,7 @@ const adminBtn = document.getElementById('adminBtn');
 const addBtn = document.getElementById('addBtn');
 const loginModal = document.getElementById('loginModal');
 const promptModal = document.getElementById('promptModal');
+const detailModal = document.getElementById('detailModal');
 const toast = document.getElementById('toast');
 const toastMessage = document.getElementById('toastMessage');
 
@@ -466,60 +527,36 @@ function renderGrid(){
   grid.innerHTML = filtered.map((p) => {
     const color = categoryColor(p.category);
     return `
-    <div class="card">
-      <div class="card-body">
-        <div class="card-top"><div class="card-title">${p.title}</div></div>
-        <div class="card-meta">
-          <span>${formatDate(p.created_at)}</span>
-          <span class="cat-tag" style="background:${color.bg};color:${color.text};">${p.category}</span>
-          <span class="copy-count" title="Veces copiado">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            ${p.copy_count || 0}
-          </span>
-        </div>
-        <div class="terminal-window">
-          <div class="terminal-bar">
-            <span class="terminal-dot red"></span>
-            <span class="terminal-dot yellow"></span>
-            <span class="terminal-dot green"></span>
+    <div class="card" data-id="${p.id}">
+      <div class="card-top">
+        <div class="card-title">${p.title}</div>
+        ${session ? `
+          <div class="card-admin-actions">
+            <button class="icon-btn edit-btn" data-id="${p.id}" title="Editar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            </button>
+            <button class="icon-btn delete-btn" data-id="${p.id}" title="Borrar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2L4 6"/></svg>
+            </button>
           </div>
-          <div class="card-prompt">${p.prompt_text}</div>
-        </div>
-        <div class="card-actions">
-          <button class="copy-btn" data-id="${p.id}">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            <span>Copiar</span>
-          </button>
-          ${session ? `
-            <button class="edit-btn" data-id="${p.id}">Editar</button>
-            <button class="delete-btn" data-id="${p.id}">Borrar</button>
-          ` : ''}
-        </div>
+        ` : ''}
+      </div>
+      <div class="card-meta">
+        <span>${formatDate(p.created_at)}</span>
+        <span class="cat-tag" style="background:${color.bg};color:${color.text};">${p.category}</span>
+        <span class="copy-count" title="Veces copiado">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          ${p.copy_count || 0}
+        </span>
       </div>
     </div>
   `;
   }).join('');
 
-  grid.querySelectorAll('.copy-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const p = prompts.find(x => x.id === btn.dataset.id);
-      try { await navigator.clipboard.writeText(p.prompt_text); }
-      catch(e){
-        const ta=document.createElement('textarea');ta.value=p.prompt_text;document.body.appendChild(ta);
-        ta.select();document.execCommand('copy');document.body.removeChild(ta);
-      }
-      const span = btn.querySelector('span');
-      const original = span.textContent;
-      btn.classList.add('copied'); span.textContent = 'Copiado ✓';
-      setTimeout(() => { btn.classList.remove('copied'); span.textContent = original; }, 1600);
-
-      // Incrementar contador de copias, sin bloquear la respuesta visual
-      p.copy_count = (p.copy_count || 0) + 1;
-      const countEl = btn.closest('.card-body').querySelector('.copy-count');
-      if(countEl) countEl.lastChild.textContent = ' ' + p.copy_count;
-      sb.rpc('increment_copy_count', { prompt_id: p.id }).then(({ error }) => {
-        if(error) console.error('Error al incrementar contador:', error);
-      });
+  grid.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', (e) => {
+      if(e.target.closest('.icon-btn')) return; // no abrir el detalle si se hizo click en editar/borrar
+      openDetailModal(card.dataset.id);
     });
   });
 
@@ -536,6 +573,84 @@ function renderGrid(){
     });
   });
 }
+
+/* ---------- MODAL DE DETALLE ---------- */
+const detailTitle = document.getElementById('detailTitle');
+const detailDate = document.getElementById('detailDate');
+const detailCategory = document.getElementById('detailCategory');
+const detailPrompt = document.getElementById('detailPrompt');
+const detailImage = document.getElementById('detailImage');
+const detailCopyBtn = document.getElementById('detailCopyBtn');
+const detailAdminActions = document.getElementById('detailAdminActions');
+const detailEditBtn = document.getElementById('detailEditBtn');
+const detailDeleteBtn = document.getElementById('detailDeleteBtn');
+let currentDetailId = null;
+
+function openDetailModal(id){
+  const p = prompts.find(x => x.id === id);
+  if(!p) return;
+  currentDetailId = id;
+  const color = categoryColor(p.category);
+
+  detailTitle.textContent = p.title;
+  detailDate.textContent = formatDate(p.created_at);
+  detailCategory.textContent = p.category;
+  detailCategory.style.background = color.bg;
+  detailCategory.style.color = color.text;
+  detailPrompt.textContent = p.prompt_text;
+
+  if(p.image_url){
+    detailImage.src = p.image_url;
+    detailImage.style.display = 'block';
+  } else {
+    detailImage.style.display = 'none';
+  }
+
+  detailAdminActions.style.display = session ? 'flex' : 'none';
+
+  const span = detailCopyBtn.querySelector('span');
+  span.textContent = 'Copiar prompt';
+  detailCopyBtn.classList.remove('copied');
+
+  detailModal.classList.add('open');
+}
+
+document.getElementById('detailClose').addEventListener('click', () => detailModal.classList.remove('open'));
+
+detailCopyBtn.addEventListener('click', async () => {
+  const p = prompts.find(x => x.id === currentDetailId);
+  if(!p) return;
+  try { await navigator.clipboard.writeText(p.prompt_text); }
+  catch(e){
+    const ta=document.createElement('textarea');ta.value=p.prompt_text;document.body.appendChild(ta);
+    ta.select();document.execCommand('copy');document.body.removeChild(ta);
+  }
+  const span = detailCopyBtn.querySelector('span');
+  const original = span.textContent;
+  detailCopyBtn.classList.add('copied'); span.textContent = 'Copiado ✓';
+  setTimeout(() => { detailCopyBtn.classList.remove('copied'); span.textContent = original; }, 1600);
+
+  // Incrementar contador de copias y reflejarlo al instante en la lista
+  p.copy_count = (p.copy_count || 0) + 1;
+  renderGrid();
+  sb.rpc('increment_copy_count', { prompt_id: p.id }).then(({ error }) => {
+    if(error) console.error('Error al incrementar contador:', error);
+  });
+});
+
+detailEditBtn.addEventListener('click', () => {
+  detailModal.classList.remove('open');
+  openPromptModal(currentDetailId);
+});
+
+detailDeleteBtn.addEventListener('click', async () => {
+  if(!confirm('¿Borrar este prompt permanentemente?')) return;
+  const { error } = await sb.from('prompts').delete().eq('id', currentDetailId);
+  if(error){ alert('Error al borrar: ' + error.message); return; }
+  detailModal.classList.remove('open');
+  await loadPrompts();
+  showToast('Prompt borrado ✓');
+});
 
 addBtn.addEventListener('click', () => openPromptModal(null));
 document.getElementById('promptCancel').addEventListener('click', () => promptModal.classList.remove('open'));
@@ -563,11 +678,13 @@ function openPromptModal(id){
     document.getElementById('promptModalTitle').textContent = 'Editar prompt';
     document.getElementById('fieldTitle').value = p.title;
     document.getElementById('fieldCategory').value = p.category;
+    document.getElementById('fieldImage').value = p.image_url || '';
     document.getElementById('fieldText').value = p.prompt_text;
   } else {
     document.getElementById('promptModalTitle').textContent = 'Agregar prompt';
     document.getElementById('fieldTitle').value = '';
     document.getElementById('fieldCategory').value = '';
+    document.getElementById('fieldImage').value = '';
     document.getElementById('fieldText').value = '';
   }
   promptModal.classList.add('open');
@@ -577,6 +694,7 @@ function openPromptModal(id){
 document.getElementById('promptSubmit').addEventListener('click', async () => {
   const title = document.getElementById('fieldTitle').value.trim();
   const category = document.getElementById('fieldCategory').value.trim();
+  const image_url = document.getElementById('fieldImage').value.trim();
   const prompt_text = document.getElementById('fieldText').value.trim();
 
   if(!title || !category || !prompt_text){
@@ -587,9 +705,9 @@ document.getElementById('promptSubmit').addEventListener('click', async () => {
   let error;
   const wasEditing = !!editingId;
   if(editingId){
-    ({ error } = await sb.from('prompts').update({ title, category, prompt_text }).eq('id', editingId));
+    ({ error } = await sb.from('prompts').update({ title, category, image_url, prompt_text }).eq('id', editingId));
   } else {
-    ({ error } = await sb.from('prompts').insert([{ title, category, prompt_text }]));
+    ({ error } = await sb.from('prompts').insert([{ title, category, image_url, prompt_text }]));
   }
   if(error){ alert('Error al guardar: ' + error.message); return; }
   promptModal.classList.remove('open');
@@ -616,11 +734,12 @@ document.addEventListener('keydown', (e) => {
   if(e.key === 'Escape'){
     loginModal.classList.remove('open');
     promptModal.classList.remove('open');
+    detailModal.classList.remove('open');
   }
 });
 
 // Cerrar el modal si se hace clic en el fondo oscuro (fuera de la tarjeta del modal)
-[loginModal, promptModal].forEach(overlay => {
+[loginModal, promptModal, detailModal].forEach(overlay => {
   overlay.addEventListener('click', (e) => {
     if(e.target === overlay) overlay.classList.remove('open');
   });
