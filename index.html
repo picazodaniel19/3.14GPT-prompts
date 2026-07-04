@@ -36,7 +36,14 @@
   .search-bar input{background:none;border:none;outline:none;color:var(--blanco);font-family:var(--font-mono);font-size:14px;width:100%;}
   .search-bar input::placeholder{color:var(--gris-claro);opacity:.5;}
   .search-bar kbd{font-family:var(--font-mono);font-size:11px;color:var(--gris-claro);background:var(--grafito);border-radius:4px;padding:2px 6px;flex-shrink:0;}
-  .cat-filters{display:flex;gap:8px;flex-wrap:wrap;flex:1;}
+  .cat-filters{display:flex;gap:8px;flex-wrap:wrap;flex:1;align-items:center;}
+  .sort-select{
+    font-family:var(--font-body);font-size:13px;font-weight:500;
+    color:var(--gris-claro);background:var(--carbon);
+    border:1px solid var(--grafito);border-radius:999px;
+    padding:6px 14px;cursor:pointer;margin-left:auto;
+  }
+  .sort-select:focus{outline:none;border-color:var(--verde);}
   .chip{font-family:var(--font-body);font-size:13px;font-weight:500;color:var(--gris-claro);background:var(--carbon);border:1px solid var(--grafito);border-radius:999px;padding:6px 14px;cursor:pointer;transition:all .15s ease;}
   .chip:hover{border-color:var(--verde);color:var(--blanco);}
   .chip.active{background:var(--verde);border-color:var(--verde);color:var(--negro);font-weight:600;}
@@ -69,6 +76,10 @@
   .card-title{font-family:var(--font-title);font-weight:700;font-size:16px;letter-spacing:-0.01em;}
   .card-meta{display:flex;gap:10px;align-items:center;font-family:var(--font-mono);font-size:11px;color:var(--gris-claro);flex-wrap:wrap;flex-shrink:0;}
   .cat-tag{background:rgba(52,199,89,0.12);color:var(--verde);padding:3px 8px;border-radius:6px;font-weight:500;}
+  .copy-count{
+    display:flex;align-items:center;gap:4px;
+    color:var(--gris-claro);opacity:.7;
+  }
   .card-prompt{background:var(--negro);border:1px solid var(--grafito);border-radius:8px;padding:12px 14px;font-family:var(--font-mono);font-size:12.5px;color:var(--gris-claro);height:112px;overflow:hidden;position:relative;line-height:1.6;flex-shrink:0;}
   .card-prompt::after{content:'';position:absolute;bottom:0;left:0;right:0;height:28px;background:linear-gradient(transparent, var(--negro));}
   .card-actions{display:flex;gap:8px;flex-shrink:0;}
@@ -121,6 +132,13 @@
   </div>
   <div class="nav-wrap" style="padding-top:0;">
     <div class="cat-filters" id="catFilters"></div>
+    <select class="sort-select" id="sortSelect">
+      <option value="recientes">Más recientes</option>
+      <option value="antiguos">Más antiguos</option>
+      <option value="alfabetico">Alfabético (A-Z)</option>
+      <option value="categoria">Por categoría</option>
+      <option value="populares">Más copiados</option>
+    </select>
   </div>
 </header>
 
@@ -197,6 +215,9 @@ let prompts = [];
 let session = null;
 let activeCategory = 'Todos';
 let editingId = null;
+let sortMode = 'recientes';
+
+const sortSelect = document.getElementById('sortSelect');
 
 const grid = document.getElementById('grid');
 const searchInput = document.getElementById('searchInput');
@@ -294,14 +315,50 @@ function formatDate(d){
   return date.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
 }
 
+/* Paleta de acento para categorías: variaciones que combinan con el tema oscuro/verde de la marca */
+const CATEGORY_PALETTE = [
+  { bg:'rgba(52,199,89,0.12)',  text:'#34C759' },  // verde marca
+  { bg:'rgba(88,166,255,0.12)', text:'#58A6FF' },  // azul
+  { bg:'rgba(255,166,87,0.12)', text:'#FFA657' },  // naranja
+  { bg:'rgba(214,110,255,0.12)',text:'#D66EFF' },  // morado
+  { bg:'rgba(255,123,114,0.12)',text:'#FF7B72' },  // rojo coral
+  { bg:'rgba(121,192,255,0.12)',text:'#79C0FF' },  // celeste
+  { bg:'rgba(255,209,102,0.12)',text:'#FFD166' },  // amarillo
+  { bg:'rgba(150,200,150,0.12)',text:'#96C896' },  // verde suave
+];
+function categoryColor(category){
+  let hash = 0;
+  for(let i=0;i<category.length;i++) hash = category.charCodeAt(i) + ((hash << 5) - hash);
+  const idx = Math.abs(hash) % CATEGORY_PALETTE.length;
+  return CATEGORY_PALETTE[idx];
+}
+
+function sortPrompts(list){
+  const sorted = [...list];
+  switch(sortMode){
+    case 'antiguos':
+      return sorted.sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+    case 'alfabetico':
+      return sorted.sort((a,b) => a.title.localeCompare(b.title, 'es'));
+    case 'categoria':
+      return sorted.sort((a,b) => a.category.localeCompare(b.category, 'es') || a.title.localeCompare(b.title, 'es'));
+    case 'populares':
+      return sorted.sort((a,b) => (b.copy_count||0) - (a.copy_count||0));
+    case 'recientes':
+    default:
+      return sorted.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+  }
+}
+
 function renderGrid(){
   const query = searchInput.value.trim().toLowerCase();
-  const filtered = prompts.filter(p => {
+  let filtered = prompts.filter(p => {
     const matchesCat = activeCategory === 'Todos' || p.category === activeCategory;
     const haystack = (p.title + ' ' + p.category + ' ' + p.prompt_text).toLowerCase();
     const matchesQuery = query === '' || haystack.includes(query);
     return matchesCat && matchesQuery;
   });
+  filtered = sortPrompts(filtered);
 
   document.getElementById('totalCount').textContent = prompts.length;
   resultsText.textContent = filtered.length === prompts.length
@@ -317,13 +374,19 @@ function renderGrid(){
   grid.style.display = 'grid';
   emptyState.style.display = 'none';
 
-  grid.innerHTML = filtered.map((p) => `
+  grid.innerHTML = filtered.map((p) => {
+    const color = categoryColor(p.category);
+    return `
     <div class="card">
       <div class="card-body">
         <div class="card-top"><div class="card-title">${p.title}</div></div>
         <div class="card-meta">
           <span>${formatDate(p.created_at)}</span>
-          <span class="cat-tag">${p.category}</span>
+          <span class="cat-tag" style="background:${color.bg};color:${color.text};">${p.category}</span>
+          <span class="copy-count" title="Veces copiado">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            ${p.copy_count || 0}
+          </span>
         </div>
         <div class="card-prompt">${p.prompt_text}</div>
         <div class="card-actions">
@@ -338,7 +401,8 @@ function renderGrid(){
         </div>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   grid.querySelectorAll('.copy-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
@@ -352,6 +416,14 @@ function renderGrid(){
       const original = span.textContent;
       btn.classList.add('copied'); span.textContent = 'Copiado ✓';
       setTimeout(() => { btn.classList.remove('copied'); span.textContent = original; }, 1600);
+
+      // Incrementar contador de copias, sin bloquear la respuesta visual
+      p.copy_count = (p.copy_count || 0) + 1;
+      const countEl = btn.closest('.card-body').querySelector('.copy-count');
+      if(countEl) countEl.lastChild.textContent = ' ' + p.copy_count;
+      sb.rpc('increment_copy_count', { prompt_id: p.id }).then(({ error }) => {
+        if(error) console.error('Error al incrementar contador:', error);
+      });
     });
   });
 
@@ -411,6 +483,10 @@ document.getElementById('promptSubmit').addEventListener('click', async () => {
 });
 
 searchInput.addEventListener('input', renderGrid);
+sortSelect.addEventListener('change', () => {
+  sortMode = sortSelect.value;
+  renderGrid();
+});
 clearFilter.addEventListener('click', () => {
   searchInput.value = '';
   activeCategory = 'Todos';
