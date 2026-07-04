@@ -63,8 +63,7 @@
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(420px,1fr));gap:20px;}
   .card{background:var(--carbon);border:1px solid var(--grafito);border-radius:var(--radius);overflow:hidden;display:flex;align-items:flex-start;transition:border-color .15s ease;position:relative;}
   .card:hover{border-color:var(--verde);}
-  .card-image{width:220px;height:130px;flex-shrink:0;background:var(--grafito);position:relative;overflow:hidden;}
-  .card-image img{width:100%;height:100%;object-fit:cover;display:block;}
+  .card-image{display:none;}
   .card-body{flex:1;min-width:0;padding:18px 20px;display:flex;flex-direction:column;gap:10px;}
   .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-shrink:0;}
   .card-title{font-family:var(--font-title);font-weight:700;font-size:16px;letter-spacing:-0.01em;}
@@ -104,8 +103,6 @@
   @media (max-width:720px){
     .nav-wrap{flex-wrap:wrap;}
     .cat-filters{order:3;width:100%;}
-    .card{flex-direction:column;}
-    .card-image{width:100%;height:160px;}
     .grid{grid-template-columns:1fr;}
   }
 </style>
@@ -176,8 +173,6 @@
     <input type="text" id="fieldTitle" placeholder="Retrato editorial silueta neón">
     <label>Categoría</label>
     <input type="text" id="fieldCategory" placeholder="Marca 3.14GPT">
-    <label>URL de imagen de referencia</label>
-    <input type="text" id="fieldImage" placeholder="https://...">
     <label>Texto del prompt</label>
     <textarea id="fieldText" placeholder="Cinematic editorial portrait..."></textarea>
     <div class="modal-error" id="promptError">Completa título, categoría y texto del prompt.</div>
@@ -324,7 +319,6 @@ function renderGrid(){
 
   grid.innerHTML = filtered.map((p) => `
     <div class="card">
-      <div class="card-image"><img src="${p.image_url || 'https://placehold.co/320x320/1B1D21/34C759?text=3.14GPT'}" alt="${p.title}" loading="lazy"></div>
       <div class="card-body">
         <div class="card-top"><div class="card-title">${p.title}</div></div>
         <div class="card-meta">
@@ -385,13 +379,11 @@ function openPromptModal(id){
     document.getElementById('promptModalTitle').textContent = 'Editar prompt';
     document.getElementById('fieldTitle').value = p.title;
     document.getElementById('fieldCategory').value = p.category;
-    document.getElementById('fieldImage').value = p.image_url || '';
     document.getElementById('fieldText').value = p.prompt_text;
   } else {
     document.getElementById('promptModalTitle').textContent = 'Agregar prompt';
     document.getElementById('fieldTitle').value = '';
     document.getElementById('fieldCategory').value = '';
-    document.getElementById('fieldImage').value = '';
     document.getElementById('fieldText').value = '';
   }
   promptModal.classList.add('open');
@@ -400,7 +392,6 @@ function openPromptModal(id){
 document.getElementById('promptSubmit').addEventListener('click', async () => {
   const title = document.getElementById('fieldTitle').value.trim();
   const category = document.getElementById('fieldCategory').value.trim();
-  const image_url = document.getElementById('fieldImage').value.trim();
   const prompt_text = document.getElementById('fieldText').value.trim();
 
   if(!title || !category || !prompt_text){
@@ -410,9 +401,9 @@ document.getElementById('promptSubmit').addEventListener('click', async () => {
 
   let error;
   if(editingId){
-    ({ error } = await sb.from('prompts').update({ title, category, image_url, prompt_text }).eq('id', editingId));
+    ({ error } = await sb.from('prompts').update({ title, category, prompt_text }).eq('id', editingId));
   } else {
-    ({ error } = await sb.from('prompts').insert([{ title, category, image_url, prompt_text }]));
+    ({ error } = await sb.from('prompts').insert([{ title, category, prompt_text }]));
   }
   if(error){ alert('Error al guardar: ' + error.message); return; }
   promptModal.classList.remove('open');
