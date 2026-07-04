@@ -124,11 +124,23 @@
   }
   .detail-prompt::-webkit-scrollbar{width:6px;}
   .detail-prompt::-webkit-scrollbar-thumb{background:var(--grafito);border-radius:6px;}
-  .detail-image{
-    width:100%;max-height:280px;object-fit:cover;
+  .detail-image-wrap{
+    position:relative;width:100%;height:280px;
     border-radius:8px;border:1px solid var(--grafito);
-    margin-top:16px;display:block;
+    margin-top:16px;overflow:hidden;background:var(--negro);
   }
+  .detail-image-bg{
+    position:absolute;inset:-20px;
+    background-size:cover;background-position:center;
+    filter:blur(24px) brightness(0.5);
+    transform:scale(1.1);
+  }
+  .detail-image-fg{
+    position:relative;width:100%;height:100%;
+    display:block;z-index:1;
+  }
+  .detail-image-fg.fit-cover{object-fit:cover;}
+  .detail-image-fg.fit-contain{object-fit:contain;}
   .detail-copy-btn{
     width:100%;margin-top:20px;
     display:flex;align-items:center;justify-content:center;gap:8px;
@@ -139,6 +151,26 @@
   .detail-copy-btn:hover{filter:brightness(1.1);}
   .detail-copy-btn.copied{background:var(--blanco);}
 
+  .focus-picker{
+    position:relative;width:100%;height:200px;
+    border-radius:8px;border:1px solid var(--grafito);
+    overflow:hidden;cursor:crosshair;display:none;background:var(--negro);
+    margin-top:8px;
+  }
+  .focus-picker img{width:100%;height:100%;object-fit:cover;pointer-events:none;}
+  .focus-marker{
+    position:absolute;width:20px;height:20px;border-radius:50%;
+    border:2px solid var(--verde);background:rgba(52,199,89,0.3);
+    transform:translate(-50%,-50%);pointer-events:none;
+    box-shadow:0 0 0 2px rgba(0,0,0,0.5);
+  }
+  .fit-mode-toggle{display:flex;gap:8px;margin-top:8px;}
+  .fit-mode-btn{
+    flex:1;padding:9px;border-radius:8px;border:1px solid var(--grafito);
+    background:var(--negro);color:var(--gris-claro);font-family:var(--font-body);
+    font-size:12.5px;font-weight:600;cursor:pointer;transition:all .15s ease;
+  }
+  .fit-mode-btn.active{background:var(--verde);color:var(--negro);border-color:var(--verde);}
   .empty-state{text-align:center;padding:80px 20px;color:var(--gris-claro);}
   .empty-state .big{font-family:var(--font-mono);font-size:40px;color:var(--grafito);margin-bottom:12px;}
 
@@ -259,6 +291,16 @@
     <input type="text" id="fieldCategory" placeholder="Marca 3.14GPT">
     <label>URL de imagen de referencia (opcional)</label>
     <input type="text" id="fieldImage" placeholder="https://i.imgur.com/...">
+
+    <div class="fit-mode-toggle" id="fitModeToggle" style="display:none;">
+      <button type="button" class="fit-mode-btn" data-mode="cover">Recortar (elegir foco)</button>
+      <button type="button" class="fit-mode-btn" data-mode="contain">Ver completa (fondo difuminado)</button>
+    </div>
+    <div class="focus-picker" id="focusPicker">
+      <img id="focusPickerImg" src="" alt="">
+      <div class="focus-marker" id="focusMarker"></div>
+    </div>
+
     <label>Texto del prompt</label>
     <textarea id="fieldText" placeholder="Cinematic editorial portrait..."></textarea>
     <label style="display:flex;justify-content:space-between;align-items:center;">
@@ -299,7 +341,10 @@
       </div>
       <div class="detail-prompt" id="detailPrompt"></div>
     </div>
-    <img class="detail-image" id="detailImage" style="display:none;" alt="Imagen de referencia">
+    <div class="detail-image-wrap" id="detailImageWrap" style="display:none;">
+      <div class="detail-image-bg" id="detailImageBg"></div>
+      <img class="detail-image-fg" id="detailImage" alt="Imagen de referencia">
+    </div>
     <button class="detail-copy-btn" id="detailCopyBtn">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
       <span>Copiar prompt</span>
@@ -579,6 +624,8 @@ const detailTitle = document.getElementById('detailTitle');
 const detailDate = document.getElementById('detailDate');
 const detailCategory = document.getElementById('detailCategory');
 const detailPrompt = document.getElementById('detailPrompt');
+const detailImageWrap = document.getElementById('detailImageWrap');
+const detailImageBg = document.getElementById('detailImageBg');
 const detailImage = document.getElementById('detailImage');
 const detailCopyBtn = document.getElementById('detailCopyBtn');
 const detailAdminActions = document.getElementById('detailAdminActions');
@@ -600,10 +647,21 @@ function openDetailModal(id){
   detailPrompt.textContent = p.prompt_text;
 
   if(p.image_url){
+    detailImageWrap.style.display = 'block';
     detailImage.src = p.image_url;
-    detailImage.style.display = 'block';
+    const fx = p.image_focus_x ?? 50;
+    const fy = p.image_focus_y ?? 50;
+    if(p.image_fit === 'contain'){
+      detailImage.className = 'detail-image-fg fit-contain';
+      detailImageBg.style.display = 'block';
+      detailImageBg.style.backgroundImage = `url('${p.image_url}')`;
+    } else {
+      detailImage.className = 'detail-image-fg fit-cover';
+      detailImage.style.objectPosition = `${fx}% ${fy}%`;
+      detailImageBg.style.display = 'none';
+    }
   } else {
-    detailImage.style.display = 'none';
+    detailImageWrap.style.display = 'none';
   }
 
   detailAdminActions.style.display = session ? 'flex' : 'none';
@@ -670,6 +728,55 @@ function updatePromptPreview(){
 }
 fieldText.addEventListener('input', updatePromptPreview);
 
+/* ---------- CONTROL DE IMAGEN: foco y modo de ajuste ---------- */
+const fieldImage = document.getElementById('fieldImage');
+const fitModeToggle = document.getElementById('fitModeToggle');
+const focusPicker = document.getElementById('focusPicker');
+const focusPickerImg = document.getElementById('focusPickerImg');
+const focusMarker = document.getElementById('focusMarker');
+let currentFocusX = 50, currentFocusY = 50, currentFit = 'cover';
+
+function updateFocusMarker(){
+  focusMarker.style.left = currentFocusX + '%';
+  focusMarker.style.top = currentFocusY + '%';
+}
+
+function updateImageControlsVisibility(){
+  const url = fieldImage.value.trim();
+  if(url){
+    fitModeToggle.style.display = 'flex';
+    focusPickerImg.src = url;
+    focusPicker.style.display = currentFit === 'cover' ? 'block' : 'none';
+    updateFocusMarker();
+  } else {
+    fitModeToggle.style.display = 'none';
+    focusPicker.style.display = 'none';
+  }
+}
+fieldImage.addEventListener('input', updateImageControlsVisibility);
+
+fitModeToggle.querySelectorAll('.fit-mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    currentFit = btn.dataset.mode;
+    fitModeToggle.querySelectorAll('.fit-mode-btn').forEach(b => b.classList.toggle('active', b === btn));
+    updateImageControlsVisibility();
+  });
+});
+
+// Click en la vista previa para marcar el punto de enfoque (estilo "elige el centro de tu foto")
+focusPicker.addEventListener('click', (e) => {
+  const rect = focusPicker.getBoundingClientRect();
+  currentFocusX = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+  currentFocusY = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+  currentFocusX = Math.max(0, Math.min(100, currentFocusX));
+  currentFocusY = Math.max(0, Math.min(100, currentFocusY));
+  updateFocusMarker();
+});
+
+function setFitModeButtons(mode){
+  fitModeToggle.querySelectorAll('.fit-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+}
+
 function openPromptModal(id){
   editingId = id;
   document.getElementById('promptError').classList.remove('visible');
@@ -680,13 +787,21 @@ function openPromptModal(id){
     document.getElementById('fieldCategory').value = p.category;
     document.getElementById('fieldImage').value = p.image_url || '';
     document.getElementById('fieldText').value = p.prompt_text;
+    currentFocusX = p.image_focus_x ?? 50;
+    currentFocusY = p.image_focus_y ?? 50;
+    currentFit = p.image_fit || 'cover';
   } else {
     document.getElementById('promptModalTitle').textContent = 'Agregar prompt';
     document.getElementById('fieldTitle').value = '';
     document.getElementById('fieldCategory').value = '';
     document.getElementById('fieldImage').value = '';
     document.getElementById('fieldText').value = '';
+    currentFocusX = 50;
+    currentFocusY = 50;
+    currentFit = 'cover';
   }
+  setFitModeButtons(currentFit);
+  updateImageControlsVisibility();
   promptModal.classList.add('open');
   updatePromptPreview();
 }
@@ -702,12 +817,19 @@ document.getElementById('promptSubmit').addEventListener('click', async () => {
     return;
   }
 
+  const payload = {
+    title, category, image_url, prompt_text,
+    image_focus_x: currentFocusX,
+    image_focus_y: currentFocusY,
+    image_fit: currentFit
+  };
+
   let error;
   const wasEditing = !!editingId;
   if(editingId){
-    ({ error } = await sb.from('prompts').update({ title, category, image_url, prompt_text }).eq('id', editingId));
+    ({ error } = await sb.from('prompts').update(payload).eq('id', editingId));
   } else {
-    ({ error } = await sb.from('prompts').insert([{ title, category, image_url, prompt_text }]));
+    ({ error } = await sb.from('prompts').insert([payload]));
   }
   if(error){ alert('Error al guardar: ' + error.message); return; }
   promptModal.classList.remove('open');
