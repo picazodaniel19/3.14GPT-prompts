@@ -200,6 +200,11 @@
     <div class="big">∅</div>
     <div>No encontré prompts con esa búsqueda.</div>
   </div>
+  <div class="empty-state" id="errorState" style="display:none;">
+    <div class="big" style="color:#e05656;">⚠</div>
+    <div>No se pudo conectar con la base de datos. Revisa tu conexión a internet.</div>
+    <button class="add-btn visible" id="retryBtn" style="margin-top:20px;background:var(--grafito);color:var(--blanco);">Reintentar</button>
+  </div>
 </main>
 
 <footer>
@@ -294,13 +299,33 @@ function showToast(message){
   toastTimeout = setTimeout(() => toast.classList.remove('visible'), 2400);
 }
 
+const errorState = document.getElementById('errorState');
+const retryBtn = document.getElementById('retryBtn');
+
 async function loadPrompts(){
-  const { data, error } = await sb.from('prompts').select('*').order('created_at', { ascending:false });
-  if(error){ resultsText.textContent = 'Error al cargar prompts.'; console.error(error); return; }
+  grid.style.display = 'none';
+  emptyState.style.display = 'none';
+  errorState.style.display = 'none';
+  resultsText.textContent = 'Cargando prompts...';
+
+  let data, error;
+  try {
+    ({ data, error } = await sb.from('prompts').select('*').order('created_at', { ascending:false }));
+  } catch(networkErr){
+    error = networkErr;
+  }
+
+  if(error){
+    console.error(error);
+    resultsText.textContent = '';
+    errorState.style.display = 'block';
+    return;
+  }
   prompts = data;
   renderCategories();
   renderGrid();
 }
+retryBtn.addEventListener('click', loadPrompts);
 
 async function refreshSession(){
   const { data } = await sb.auth.getSession();
@@ -588,6 +613,17 @@ document.addEventListener('keydown', (e) => {
     e.preventDefault();
     searchInput.focus();
   }
+  if(e.key === 'Escape'){
+    loginModal.classList.remove('open');
+    promptModal.classList.remove('open');
+  }
+});
+
+// Cerrar el modal si se hace clic en el fondo oscuro (fuera de la tarjeta del modal)
+[loginModal, promptModal].forEach(overlay => {
+  overlay.addEventListener('click', (e) => {
+    if(e.target === overlay) overlay.classList.remove('open');
+  });
 });
 
 (async () => {
